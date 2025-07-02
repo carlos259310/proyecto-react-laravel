@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ciudades;
 use App\Models\Contribuyente;
 use App\Models\contribuyentes;
+use App\Models\Departamentos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -70,85 +72,64 @@ class ContribuyenteApiController extends Controller
 
 
 
-public function update(Request $request, $id_contribuyente)
-{
-    $contribuyente = contribuyentes::findOrFail($id_contribuyente);
-    $data = $request->all();
-    
-    $validator = Validator::make($data, [
-        'id_tipo_documento' => 'required|integer|exists:tipos_documentos,id',
-        'documento' => 'required|string',
-        'nombres' => 'nullable|string',
-        'apellidos' => 'nullable|string',
-        'direccion' => 'required|string',
-        'telefono' => 'required|string',
-        'celular' => 'nullable|string',
-        'email' => [
-            'required',
-            'email',
-            'max:100',
-            Rule::unique('contribuyentes')->ignore($id_contribuyente, 'id_contribuyente')
-        ],
-        'usuario' => 'required|string',
-    ]);
-    
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
-    }
-    
-    if ($data['id_tipo_documento'] === 6) {
-        $razon = explode(' ', $data['nombres']);
-        $data['nombres'] = array_shift($razon);
-        $data['apellidos'] = implode(' ', $razon) . ' ' . $data['apellidos'];
-    }
-    
-    $data['nombre_completo'] = trim($data['nombres'] . ' ' . $data['apellidos']);
-    
-    $contribuyente->update($data);
-    
-    return response()->json($contribuyente);
-}
+    public function update(Request $request, $id_contribuyente)
+    {
+        $contribuyente = contribuyentes::findOrFail($id_contribuyente);
+        $data = $request->all();
 
-  /*
-public function update(Request $request, $id_contribuyente)
-{
-    $contribuyente = contribuyentes::findOrFail($id_contribuyente);
+        $validator = Validator::make($data, [
+            'id_tipo_documento' => 'required|integer|exists:tipos_documentos,id',
+            'documento' => 'required|string',
+            'nombres' => 'nullable|string',
+            'apellidos' => 'nullable|string',
+            'direccion' => 'required|string',
+            'telefono' => 'required|string',
+            'celular' => 'nullable|string',
+            'email' => [
+                'required',
+                'email',
+                'max:100',
+                Rule::unique('contribuyentes')->ignore($id_contribuyente, 'id_contribuyente')
+            ],
+            'usuario' => 'required|string',
+        ]);
 
-    $data = $request->all();
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
 
-    $validator = Validator::make($data, [
-        'id_tipo_documento' => 'required|integer|exists:tipos_documentos,id',
-        'documento' => 'required|string',
-        'nombres' => 'nullable|string',
-        'apellidos' => 'nullable|string',
-        'direccion' => 'required|string',
-        'telefono' => 'required|string',
-        'celular' => 'nullable|string',
-        'email' => 'required|email|max:100|unique:contribuyentes,email,' . $id_contribuyente . ',id_contribuyente',
-        'usuario' => 'required|string',
-    ]);
+        if ($data['id_tipo_documento'] === 6) {
+            $razon = explode(' ', $data['nombres']);
+            $data['nombres'] = array_shift($razon);
+            $data['apellidos'] = implode(' ', $razon) . ' ' . $data['apellidos'];
+        }
 
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
+        $data['nombre_completo'] = trim($data['nombres'] . ' ' . $data['apellidos']);
+
+        $contribuyente->update($data);
+
+        return response()->json($contribuyente);
     }
 
-    if ($data['id_tipo_documento'] === 6) {
-        $razon = explode(' ', $data['nombres']);
-        $data['nombres'] = array_shift($razon);
-        $data['apellidos'] = implode(' ', $razon) . ' ' . $data['apellidos'];
-    }
-
-    $data['nombre_completo'] = trim($data['nombres'] . ' ' . $data['apellidos']);
-
-    $contribuyente->update($data);
-    return response()->json($contribuyente);
-}
-
-*/
     public function destroy($id)
     {
         $contribuyente = contribuyentes::findOrFail($id);
         $contribuyente->delete();
         return response()->json(null, 204);
+    }
+
+
+    // En tu controlador API
+    public function getDepartamentos()
+    {
+        $departamentos = Departamentos::all();
+        return response()->json($departamentos);
+    }
+
+    public function getCiudades(Request $request)
+    {
+        $departamentoId = $request->query('departamento');
+        $ciudades = Ciudades::where('id_departamento', $departamentoId)->get();
+        return response()->json($ciudades);
     }
 }
