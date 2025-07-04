@@ -18,6 +18,23 @@ export interface Contribuyente {
   updated_at?: string;
 }
 
+
+//ciudades
+
+
+
+
+export interface Departamento {
+  id: string;
+  nombre: string;
+}
+
+export interface TipoDocumento {
+  id: number | string;
+  nombre: string;
+}
+
+
 export const getContribuyentes = () =>
   axios.get<{ data: Contribuyente[] }>('/api/contribuyentes');
 
@@ -32,3 +49,13 @@ export const updateContribuyente = (id: number, data: Partial<Contribuyente>) =>
 
 export const deleteContribuyente = (id: number) =>
       axios.delete(`/api/contribuyentes/${id}`);
+
+
+
+// Departamentos
+export const getDepartamentos = () =>
+  axios.get<Departamento[]>('/api/departamentos');
+
+// Tipos de documento
+export const getTiposDocumento = () =>
+  axios.get<TipoDocumento[]>('/api/tipos-documento');

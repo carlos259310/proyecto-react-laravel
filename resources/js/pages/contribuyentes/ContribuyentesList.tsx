@@ -90,33 +90,33 @@ const ContribuyentesList: React.FC = () => {
 
   const applyFilters = () => {
     let result = [...contribuyentes];
-    
+
     if (filters.tipo_documento) {
-      result = result.filter(item => 
+      result = result.filter(item =>
         item.tipo_documento?.documento.toLowerCase().includes(filters.tipo_documento.toLowerCase())
       );
     }
 
     if (filters.documento) {
-      result = result.filter(item => 
+      result = result.filter(item =>
         item.documento.toLowerCase().includes(filters.documento.toLowerCase())
       );
     }
 
     if (filters.nombres) {
-      result = result.filter(item => 
+      result = result.filter(item =>
         item.nombres.toLowerCase().includes(filters.nombres.toLowerCase())
       );
     }
 
     if (filters.apellidos) {
-      result = result.filter(item => 
+      result = result.filter(item =>
         item.apellidos.toLowerCase().includes(filters.apellidos.toLowerCase())
       );
     }
 
     if (filters.telefono) {
-      result = result.filter(item => 
+      result = result.filter(item =>
         item.telefono.includes(filters.telefono)
       );
     }
@@ -168,6 +168,7 @@ const ContribuyentesList: React.FC = () => {
       title: 'Tipo Documento',
       dataIndex: ['tipo_documento', 'documento'],
       key: 'tipo_documento',
+      render: (_: any, record: Contribuyente) => record.tipo_documento?.documento || '',
       filterDropdown: () => (
         <Input
           placeholder="Buscar tipo"
@@ -234,14 +235,14 @@ const ContribuyentesList: React.FC = () => {
       key: 'actions',
       render: (_: any, record: Contribuyente) => (
         <Space size="middle">
-          <Button 
-            type="text" 
-            icon={<EyeOutlined />} 
+          <Button
+            type="text"
+            icon={<EyeOutlined />}
             onClick={() => handleView(record)}
           />
-          <Button 
-            type="text" 
-            icon={<EditOutlined />} 
+          <Button
+            type="text"
+            icon={<EditOutlined />}
             onClick={() => handleEdit(record)}
           />
           <Popconfirm
@@ -260,9 +261,9 @@ const ContribuyentesList: React.FC = () => {
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />} 
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
           onClick={() => {
             setCurrentContribuyente(null);
             setFormVisible(true);
