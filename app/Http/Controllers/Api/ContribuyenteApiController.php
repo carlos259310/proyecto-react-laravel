@@ -7,28 +7,48 @@ use App\Models\Ciudades;
 use App\Models\Contribuyente;
 use App\Models\contribuyentes;
 use App\Models\Departamentos;
+use App\Models\TiposDocumento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class ContribuyenteApiController extends Controller
 {
-    public function index(Request $request)
-    {
-        // Filtros estrictos
 
-        //obtener todos los registros de la tabla cliente
-        $clientes = contribuyentes::all();
-
-        $data = [
-            'status' => true,
-            'code' => 200,
-            'data' => $clientes
-        ];
-        //obtener lista de estudiantes
-        return response()->json($data, 200);
-    }
-
+public function index(Request $request)
+{
+   
+    $contribuyentes = contribuyentes::with(['tipoDocumento' => function($query) {
+        $query->select('id', 'documento', 'codigo');
+    }])->get();
+    
+   
+    $data = [
+        'status' => true,
+        'code' => 200,
+        'data' => $contribuyentes->map(function ($contribuyente) {
+            return [
+                'id_contribuyente' => $contribuyente->id_contribuyente,
+                'nombres' => $contribuyente->nombres,
+                'apellidos' => $contribuyente->apellidos,
+                'nombre_completo' => $contribuyente->nombre_completo,
+                'id_tipo_documento' => $contribuyente->id_tipo_documento,
+                'tipo_documento_codigo' => $contribuyente->tipoDocumento->codigo ?? null,
+                'tipo_documento_nombre' => $contribuyente->tipoDocumento->documento ?? null,
+                'id_ciudad' => $contribuyente->id_ciudad,
+                'id_departamento' => $contribuyente->id_departamento,
+                'documento' => $contribuyente->documento,
+                'email' => $contribuyente->email,
+                'telefono' => $contribuyente->telefono,
+                'direccion' => $contribuyente->direccion,
+                'created_at' => $contribuyente->created_at,
+                'updated_at' => $contribuyente->updated_at
+            ];
+        })
+    ];
+    
+    return response()->json($data, 200);
+}
     public function store(Request $request)
     {
         $data = $request->all();
@@ -42,7 +62,12 @@ class ContribuyenteApiController extends Controller
             'direccion' => 'required|string',
             'telefono' => 'required|string',
             'celular' => 'nullable|string',
-            'email' => 'required|email|unique:contribuyentes,email',
+               'email' => [
+        'required',
+        'email',
+        'max:100',
+      Rule::unique('contribuyentes')
+    ],
             'usuario' => 'required|string',
             'id_ciudad' => 'required|string|max:10',
             'id_departamento' => 'required|string|max:10'
@@ -85,15 +110,10 @@ class ContribuyenteApiController extends Controller
             'direccion' => 'required|string',
             'telefono' => 'required|string',
             'celular' => 'nullable|string',
-            'email' => [
-                'required',
-                'email',
-                'max:100',
-                Rule::unique('contribuyentes')->ignore($id_contribuyente, 'id_contribuyente')
-            ],
+            'email' => 'required|email|max:100|unique:contribuyentes,email,' . $id_contribuyente . ',id_contribuyente',
             'usuario' => 'required|string',
         ]);
-
+ 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
@@ -119,17 +139,4 @@ class ContribuyenteApiController extends Controller
     }
 
 
-    // En tu controlador API
-    public function getDepartamentos()
-    {
-        $departamentos = Departamentos::all();
-        return response()->json($departamentos);
-    }
-
-    public function getCiudades(Request $request)
-    {
-        $departamentoId = $request->query('departamento');
-        $ciudades = Ciudades::where('id_departamento', $departamentoId)->get();
-        return response()->json($ciudades);
-    }
 }

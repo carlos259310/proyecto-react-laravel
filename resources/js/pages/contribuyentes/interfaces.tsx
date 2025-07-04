@@ -12,6 +12,9 @@ export interface Contribuyente {
   usuario: string;
   id_ciudad: string;
   id_departamento: string;
+
+  tipo_documento_codigo: string;
+  tipo_documento_nombre: string;
   tipo_documento?: {
     id: number;
     documento: string;

@@ -91,12 +91,10 @@ const ContribuyentesList: React.FC = () => {
   const applyFilters = () => {
     let result = [...contribuyentes];
 
-    if (filters.tipo_documento) {
-      result = result.filter(item =>
-        item.tipo_documento?.documento.toLowerCase().includes(filters.tipo_documento.toLowerCase())
-      );
-    }
-
+    /*
+result = result.filter(item =>
+  (item.tipo_documento?.documento || item.tipo_documento_nombre || '').toLowerCase().includes(filters.tipo_documento.toLowerCase())
+);*/
     if (filters.documento) {
       result = result.filter(item =>
         item.documento.toLowerCase().includes(filters.documento.toLowerCase())
@@ -168,7 +166,7 @@ const ContribuyentesList: React.FC = () => {
       title: 'Tipo Documento',
       dataIndex: ['tipo_documento', 'documento'],
       key: 'tipo_documento',
-      render: (_: any, record: Contribuyente) => record.tipo_documento?.documento || '',
+      render: (_: any, record: Contribuyente) => record.tipo_documento_nombre || '',
       filterDropdown: () => (
         <Input
           placeholder="Buscar tipo"
