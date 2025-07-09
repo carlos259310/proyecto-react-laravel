@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Modal, Form, Input, Select, Button, notification } from 'antd';
 import axios from 'axios';
 import { Contribuyente, TipoDocumento, Ciudad, Departamento } from './interfaces';
@@ -14,7 +14,6 @@ interface ContribuyenteFormProps {
   ciudades: Ciudad[];
   departamentos: Departamento[];
 }
-
 
 const ContribuyenteForm: React.FC<ContribuyenteFormProps> = ({
   visible,
@@ -42,7 +41,7 @@ const ContribuyenteForm: React.FC<ContribuyenteFormProps> = ({
     }
   }, [visible, contribuyente, form]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     try {
       const values = await form.validateFields();
       setLoading(true);
@@ -87,15 +86,17 @@ const ContribuyenteForm: React.FC<ContribuyenteFormProps> = ({
         });
       }
     }
-  };
+  }, [form, contribuyente, onSubmit]);
 
-  const handleDepartamentoChange = (value: string) => {
+  const handleDepartamentoChange = useCallback((value: string) => {
     setSelectedDepartamento(value);
     form.setFieldsValue({ id_ciudad: undefined });
-  };
+  }, [form]);
 
-  const filteredCiudades = ciudades.filter(
-    ciudad => ciudad.id_departamento === selectedDepartamento
+  // Memoize filtered cities to prevent unnecessary re-calculations
+  const filteredCiudades = useMemo(() => 
+    ciudades.filter(ciudad => ciudad.id_departamento === selectedDepartamento),
+    [ciudades, selectedDepartamento]
   );
 
   return (
@@ -238,4 +239,4 @@ const ContribuyenteForm: React.FC<ContribuyenteFormProps> = ({
   );
 };
 
-export default ContribuyenteForm;
+export default React.memo(ContribuyenteForm);
