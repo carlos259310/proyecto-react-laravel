@@ -1,12 +1,16 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Table, Button, notification } from 'antd';
+import { Button } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { notification } from 'antd';
 import ContribuyenteForm from './ContribuyenteForm';
 import ContribuyenteView from './ContribuyenteView';
+import VirtualizedTable from './components/VirtualizedTable';
+import ContribuyentesErrorBoundary from './components/ContribuyentesErrorBoundary';
 import { Contribuyente } from './interfaces';
 import { useContribuyentesData } from './hooks/useContribuyentesData';
 import { useContribuyentesFilter } from './hooks/useContribuyentesFilter';
+import { usePerformanceMonitor } from './hooks/usePerformanceMonitor';
 import { createTableColumns } from './utils/tableColumns';
 
 const ContribuyentesList: React.FC = () => {
@@ -29,6 +33,9 @@ const ContribuyentesList: React.FC = () => {
     filteredData,
     handleFilterChange
   } = useContribuyentesFilter(contribuyentes);
+
+  // Performance monitoring in development
+  usePerformanceMonitor('ContribuyentesList', filteredData.length, contribuyentes.length);
 
   // Memoized event handlers to prevent unnecessary re-renders
   const handleEdit = useCallback((contribuyente: Contribuyente) => {
@@ -77,47 +84,43 @@ const ContribuyentesList: React.FC = () => {
   }), [filters, handleFilterChange, handleView, handleEdit, handleDelete]);
 
   return (
-    <div>
-      <div style={{ marginBottom: 16 }}>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleNewContribuyente}
-        >
-          Nuevo Contribuyente
-        </Button>
+    <ContribuyentesErrorBoundary>
+      <div>
+        <div style={{ marginBottom: 16 }}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={handleNewContribuyente}
+          >
+            Nuevo Contribuyente
+          </Button>
+        </div>
+
+        <VirtualizedTable
+          columns={columns}
+          dataSource={filteredData}
+          rowKey="id_contribuyente"
+          loading={loading}
+          bordered
+        />
+
+        <ContribuyenteForm
+          visible={formVisible}
+          onCancel={() => setFormVisible(false)}
+          onSubmit={handleFormSubmit}
+          contribuyente={currentContribuyente}
+          tiposDocumento={tiposDocumento}
+          ciudades={ciudades}
+          departamentos={departamentos}
+        />
+
+        <ContribuyenteView
+          visible={viewVisible}
+          onCancel={() => setViewVisible(false)}
+          contribuyente={currentContribuyente}
+        />
       </div>
-
-      <Table
-        columns={columns}
-        dataSource={filteredData}
-        rowKey="id_contribuyente"
-        loading={loading}
-        bordered
-        pagination={{
-          showSizeChanger: true,
-          showQuickJumper: true,
-          showTotal: (total, range) => 
-            `${range[0]}-${range[1]} de ${total} contribuyentes`,
-        }}
-      />
-
-      <ContribuyenteForm
-        visible={formVisible}
-        onCancel={() => setFormVisible(false)}
-        onSubmit={handleFormSubmit}
-        contribuyente={currentContribuyente}
-        tiposDocumento={tiposDocumento}
-        ciudades={ciudades}
-        departamentos={departamentos}
-      />
-
-      <ContribuyenteView
-        visible={viewVisible}
-        onCancel={() => setViewVisible(false)}
-        contribuyente={currentContribuyente}
-      />
-    </div>
+    </ContribuyentesErrorBoundary>
   );
 };
 
