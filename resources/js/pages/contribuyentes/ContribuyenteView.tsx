@@ -61,4 +61,4 @@ const ContribuyenteView: React.FC<ContribuyenteViewProps> = ({
   );
 };
 
-export default ContribuyenteView;
+export default React.memo(ContribuyenteView);
